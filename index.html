@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Rendimiento – 2°ME Bases de Datos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --surface-0:#f5f5f3;--surface-1:#efefed;--surface-2:#ffffff;
+    --text-primary:#1a1a18;--text-secondary:#5c5c58;--text-muted:#8a8a84;
+    --border:rgba(0,0,0,0.1);--border-strong:rgba(0,0,0,0.18);
+    --border-accent:#3b82f6;--border-danger:#ef4444;--border-warning:#f59e0b;
+    --bg-accent:#eff6ff;--bg-danger:#fef2f2;--bg-warning:#fffbeb;--bg-success:#f0fdf4;
+    --bg-pro:#faf5ff;
+    --text-accent:#1d4ed8;--text-danger:#dc2626;--text-warning:#b45309;--text-success:#15803d;
+    --text-pro:#7c3aed;
+    --fill-accent:#2563eb;--fill-accent-hover:#1d4ed8;
+    --on-accent:#ffffff;
+    --radius:8px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --surface-0:#1a1a18;--surface-1:#242422;--surface-2:#2e2e2b;
+      --text-primary:#f0efe8;--text-secondary:#a8a8a0;--text-muted:#6a6a64;
+      --border:rgba(255,255,255,0.1);--border-strong:rgba(255,255,255,0.18);
+      --bg-accent:#1e3a5f;--bg-danger:#3b1212;--bg-warning:#3b2500;--bg-success:#0f2d1a;
+      --bg-pro:#2d1b4e;
+      --text-accent:#60a5fa;--text-danger:#f87171;--text-warning:#fbbf24;--text-success:#4ade80;
+      --text-pro:#c084fc;
+      --fill-accent:#3b82f6;--fill-accent-hover:#60a5fa;
+    }
+  }
+  body{background:var(--surface-0);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:1rem}
+  .wrap{width:100%;max-width:540px;padding:1.5rem 0 4rem}
+  .header{text-align:center;margin-bottom:2rem;padding-top:1rem}
+  .logo{font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem}
+  h1{font-size:22px;font-weight:500;line-height:1.3;color:var(--text-primary)}
+  .sub{font-size:14px;color:var(--text-secondary);margin-top:.4rem}
+  .card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+  .card-title{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
+  label.field-label{font-size:14px;color:var(--text-secondary);margin-bottom:.4rem;display:block}
+  input[type=text]{width:100%;padding:.6rem .85rem;background:var(--surface-1);border:0.5px solid var(--border-strong);border-radius:var(--radius);font-size:16px;letter-spacing:.06em;color:var(--text-primary);outline:none;margin-bottom:.75rem}
+  input[type=text]:focus{border-color:var(--border-accent);box-shadow:0 0 0 3px var(--bg-accent)}
+  .btn-primary{width:100%;padding:.7rem 1rem;background:var(--fill-accent);color:var(--on-accent);border:none;border-radius:var(--radius);font-size:15px;font-weight:500;cursor:pointer;transition:background .15s}
+  .btn-primary:hover:not(:disabled){background:var(--fill-accent-hover)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-ghost{width:100%;padding:.65rem 1rem;background:var(--surface-1);color:var(--text-secondary);border:0.5px solid var(--border-strong);border-radius:var(--radius);font-size:14px;cursor:pointer;margin-top:.75rem}
+  .btn-ghost:hover{background:var(--surface-0)}
+  .error-box{background:var(--bg-danger);border:0.5px solid var(--border-danger);color:var(--text-danger);border-radius:var(--radius);padding:.65rem .9rem;font-size:14px;margin-top:.75rem;display:none}
+  .step-dots{display:flex;gap:.4rem;justify-content:center;margin-bottom:1.5rem}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);transition:background .2s}
+  .step-dot.active{background:var(--fill-accent)}
+  .q-num{font-size:12px;color:var(--text-muted);margin-bottom:.6rem;font-weight:500}
+  .q-text{font-size:15px;color:var(--text-primary);margin-bottom:1rem;line-height:1.55}
+  .options{display:flex;flex-direction:column;gap:.4rem}
+  .opt{display:flex;align-items:center;gap:.7rem;padding:.6rem .85rem;border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;font-size:14px;color:var(--text-secondary);transition:border-color .15s,background .15s,color .15s;user-select:none}
+  .opt:hover{border-color:var(--border-accent);background:var(--bg-accent);color:var(--text-accent)}
+  .opt.selected{border-color:var(--border-accent);background:var(--bg-accent);color:var(--text-accent)}
+  .radio-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+  .opt.selected .radio-dot{border-color:var(--fill-accent)}
+  .dot-fill{width:8px;height:8px;border-radius:50%;background:var(--fill-accent);display:none}
+  .opt.selected .dot-fill{display:block}
+  .nota-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+  .nota-btn{width:48px;height:48px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface-1);font-size:16px;font-weight:500;cursor:pointer;color:var(--text-secondary);transition:border-color .15s,background .15s,color .15s}
+  .nota-btn:hover{border-color:var(--border-accent);background:var(--bg-accent);color:var(--text-accent)}
+  .nota-btn.selected{border-color:var(--fill-accent);background:var(--bg-accent);color:var(--text-accent)}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--text-accent);flex-shrink:0}
+  .result-name{font-size:17px;font-weight:500}
+  .result-sub{font-size:12px;color:var(--text-muted);margin-top:.2rem}
+  .divider{border:none;border-top:0.5px solid var(--border);margin:1rem 0}
+  .scores-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .score-card{background:var(--surface-1);border-radius:var(--radius);padding:.75rem .5rem;text-align:center}
+  .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:500;margin-bottom:.4rem}
+  .tag-der{background:var(--bg-pro);color:var(--text-pro)}
+  .tag-mr{background:var(--bg-accent);color:var(--text-accent)}
+  .tag-gen{background:var(--bg-success);color:var(--text-success)}
+  .score-label{font-size:10px;color:var(--text-muted);line-height:1.35;margin-bottom:.35rem}
+  .score-val{font-size:30px;font-weight:500;line-height:1}
+  .high{color:var(--text-success)}.mid{color:var(--text-warning)}.low{color:var(--text-danger)}
+  .juicio-box{border-left:2px solid var(--border-accent);padding:.7rem .9rem;background:var(--bg-accent);border-radius:0 var(--radius) var(--radius) 0;margin-bottom:.85rem}
+  .juicio-box p{font-size:14px;color:var(--text-primary);line-height:1.6}
+  .obs-box{background:var(--bg-warning);border:0.5px solid var(--border-warning);border-radius:var(--radius);padding:.6rem .85rem;margin-bottom:.75rem}
+  .obs-box p{font-size:13px;color:var(--text-warning);line-height:1.5}
+  .compare-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--surface-1);margin-top:.5rem;flex-wrap:wrap}
+  .compare-badge{font-size:11px;color:var(--text-muted)}
+  .compare-val{font-size:15px;font-weight:500;color:var(--text-accent)}
+  .compare-msg{font-size:12px;color:var(--text-muted);flex:1}
+  .send-status{text-align:center;font-size:13px;color:var(--text-muted);margin-top:.6rem;display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:28px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border-strong);border-top-color:var(--fill-accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .privacy-note{text-align:center;font-size:12px;color:var(--text-muted);margin-top:.75rem}
+  .screen{display:none}
+  .screen.active{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">Instituto Tecnológico de Informática · C.E.T.P.</div>
+    <h1>Portal de Rendimiento<br>Introducción a Bases de Datos</h1>
+    <p class="sub">Grupo 2°ME · Mayo–Junio 2026</p>
+  </div>
+
+  <!-- PANTALLA 1: LOGIN -->
+  <div id="screen-login" class="screen active">
+    <div class="card">
+      <div class="card-title">Identificación</div>
+      <label class="field-label" for="ci-input">Ingresá tu número de cédula</label>
+      <input type="text" id="ci-input" placeholder="Ej: 58504399" maxlength="12" inputmode="numeric">
+      <div id="login-error" class="error-box"></div>
+      <button class="btn-primary" id="btn-login">Ver mis resultados</button>
+    </div>
+    <p class="privacy-note"><i class="ti ti-lock" style="font-size:12px"></i> Solo podés ver tus propios resultados.</p>
+  </div>
+
+  <!-- PANTALLA 2: ENCUESTA -->
+  <div id="screen-survey" class="screen">
+    <div class="step-dots" id="step-dots"></div>
+    <div class="card">
+      <div id="survey-content"></div>
+      <button class="btn-primary" id="btn-next" disabled>Continuar</button>
+    </div>
+    <p class="privacy-note">Respondé antes de ver tus notas. No hay respuestas incorrectas.</p>
+  </div>
+
+  <!-- PANTALLA 3: RESULTADO -->
+  <div id="screen-result" class="screen">
+    <div class="card">
+      <div id="result-content"></div>
+    </div>
+    <div class="send-status" id="send-status"></div>
+    <button class="btn-ghost" id="btn-reset">Consultar otra cédula</button>
+  </div>
+</div>
+
+<script>
+const STUDENTS = {
+  "57444285":{name:"Emiliano Germán Acosta Romero",num:1,scores:{may:4,jun:4,gen:5},juicio:"¡Buena participación en clase! Para afianzar lo aprendido, te sugiero rehacer los ejercicios en casa; verás que te dará mucha más seguridad.",obs:null},
+  "58501563":{name:"Agustín Maximiliano Aguirre Martínez",num:3,scores:{may:2,jun:4,gen:4},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que los ejercicios te resulten mucho más fáciles.",obs:null},
+  "56012455":{name:"Pedro Giovanni Balarini Pricoli",num:4,scores:{may:1,jun:1,gen:2},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito mayo: Se retiró luego del protocolo de incendio sin avisar."},
+  "58504399":{name:"Santiago Bordón Espino",num:5,scores:{may:8,jun:6,gen:7},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58036465":{name:"Thiago Colman",num:6,scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:null},
+  "58030308":{name:"Thiago Valentino Conde Suárez",num:7,scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito junio: No se evidencia estudio en casa ni acercamiento a los materiales de CREA."},
+  "58083797":{name:"Martín Da Silveira Möller",num:8,scores:{may:6,jun:3,gen:5},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:"Escrito junio: Las llegadas a 2.ª hora en este período se reflejaron en el rendimiento."},
+  "57760128":{name:"Mateo Esequiel Esteche Medina",num:9,scores:{may:null,jun:4,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:"Escrito junio: Las inasistencias en este período se reflejaron en el rendimiento."},
+  "61566716":{name:"Raúl Sendic Furtado López",num:10,scores:{may:1,jun:5,gen:5},juicio:"Observo un buen avance. Revisá los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58083838":{name:"Federico Gasdia Leivas",num:11,scores:{may:6,jun:6,gen:6},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "57675925":{name:"Juan Ignacio González Rosso",num:12,scores:{may:4,jun:3,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:null},
+  "58376015":{name:"Nahuel López Bittencourt",num:13,scores:{may:9,jun:10,gen:8},juicio:"¡Excelente desempeño! Tu constancia para resolver problemas y participar enriquece la clase. Continuá trabajando así.",obs:null},
+  "58484410":{name:"Luis Sebastián Madruga Ríos",num:14,scores:{may:5,jun:5,gen:5},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58177394":{name:"Juan Ignacio Maldonado Linari",num:15,scores:{may:4,jun:4,gen:4},juicio:"Observo un buen avance. Participá más e intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58151106":{name:"Lautaro Martínez Mareco",num:16,scores:{may:1,jun:null,gen:3},juicio:"Es vital aumentar tu compromiso: revisá los materiales en CREA antes de clase, consultá tus dudas en clase y asistí a tutorías para superarte.",obs:"Escrito junio: No asistió."},
+  "58478463":{name:"Facundo Santiago Pimentel Bentancor",num:17,scores:{may:6,jun:7,gen:7},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58089064":{name:"Joaquín Salazar Pacheco",num:18,scores:{may:7,jun:4,gen:6},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null},
+  "65094329":{name:"Carlos Daniel Sotillo Mollegas",num:19,scores:{may:6,jun:5,gen:6},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58478883":{name:"Juan Ignacio Souza Antúnez",num:20,scores:{may:7,jun:8,gen:7},juicio:"¡Muy buen trabajo! Valoro tu participación y tu dedicación a la asignatura. Continuá.",obs:null},
+  "58518633":{name:"Santiago Suárez Carabajal",num:21,scores:{may:9,jun:5,gen:7},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null}
+};
+
+const SURVEY = [
+  {id:"q1",text:"¿Cómo te preparaste para los escritos de este período?",opts:["Estudié varios días antes","Estudié el día anterior","Repasé poco antes de entrar","No tuve tiempo de estudiar"]},
+  {id:"q2",text:"¿Consultaste los materiales de CREA durante mayo y junio?",opts:["Sí, los revisé varias veces","Los abrí una o dos veces","Los vi pero no los estudié","No los consulté"]},
+  {id:"q3",text:"¿Qué tema te resultó más difícil?",opts:["Modelo Entidad-Relación (DER)","Modelo Relacional (MR / pasaje a tablas)","Los dos por igual","Ninguno, me sentí bien"]}
+];
+
+let student=null,answers={},notaEsperada=null,step=0;
+
+function sc(v){if(v===null)return"";if(v>=7)return"high";if(v>=5)return"mid";return"low";}
+function norm(s){return s.replace(/[.\- ]/g,"").trim();}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+
+document.getElementById("btn-login").onclick=go;
+document.getElementById("ci-input").addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+
+function go(){
+  const ci=norm(document.getElementById("ci-input").value);
+  const err=document.getElementById("login-error");
+  if(!ci){err.style.display="block";err.textContent="Ingresá tu cédula para continuar.";return;}
+  const s=STUDENTS[ci];
+  if(!s){err.style.display="block";err.textContent="Cédula no encontrada. Verificá el número e intentá de nuevo.";return;}
+  err.style.display="none";
+  student=s;answers={};notaEsperada=null;step=0;
+  show("screen-survey");
+  renderStep();
+}
+
+function dots(){
+  const c=document.getElementById("step-dots");
+  c.innerHTML="";
+  for(let i=0;i<=SURVEY.length;i++){const d=document.createElement("div");d.className="step-dot"+(i===step?" active":"");c.appendChild(d);}
+}
+
+function renderStep(){
+  dots();
+  const btn=document.getElementById("btn-next");
+  btn.disabled=true;
+  if(step<SURVEY.length){
+    const q=SURVEY[step];
+    document.getElementById("survey-content").innerHTML=`
+      <div class="q-num">Pregunta ${step+1} de ${SURVEY.length+1}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">${q.opts.map((o,i)=>`<div class="opt" onclick="pick(this,'${q.id}',${i})"><div class="radio-dot"><div class="dot-fill"></div></div><span>${o}</span></div>`).join("")}</div>`;
+    btn.textContent="Continuar";
+    if(answers[q.id]!==undefined){const el=document.querySelectorAll(".opt")[answers[q.id]];if(el){el.classList.add("selected");el.querySelector(".dot-fill").style.display="block";btn.disabled=false;}}
+  } else {
+    document.getElementById("survey-content").innerHTML=`
+      <div class="q-num">Pregunta ${SURVEY.length+1} de ${SURVEY.length+1}</div>
+      <div class="q-text">¿Qué calificación general esperabas obtener en este período? <span style="font-size:12px;color:var(--text-muted)">(escala 1–7)</span></div>
+      <div class="nota-row">${[1,2,3,4,5,6,7].map(n=>`<button class="nota-btn${notaEsperada===n?" selected":""}" onclick="pickNota(${n})">${n}</button>`).join("")}</div>`;
+    btn.textContent="Ver mis resultados";
+    if(notaEsperada!==null)btn.disabled=false;
+  }
+}
+
+window.pick=function(el,qid,idx){
+  document.querySelectorAll(".opt").forEach(o=>{o.classList.remove("selected");o.querySelector(".dot-fill").style.display="none";});
+  el.classList.add("selected");el.querySelector(".dot-fill").style.display="block";
+  answers[qid]=idx;
+  document.getElementById("btn-next").disabled=false;
+};
+window.pickNota=function(n){
+  notaEsperada=n;
+  document.querySelectorAll(".nota-btn").forEach(b=>{b.classList.toggle("selected",parseInt(b.textContent)===n);});
+  document.getElementById("btn-next").disabled=false;
+};
+document.getElementById("btn-next").onclick=function(){
+  if(step<SURVEY.length){step++;renderStep();}else{showResult();}
+};
+
+function showResult(){
+  show("screen-result");
+  const s=student;
+  const may=s.scores.may!==null?s.scores.may:"—";
+  const jun=s.scores.jun!==null?s.scores.jun:"—";
+  const gen=s.scores.gen;
+  const initials=s.name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const obsHTML=s.obs?`<div class="obs-box"><p><strong>Nota:</strong> ${s.obs}</p></div>`:"";
+  const diff=gen===notaEsperada?"Coincide con la nota obtenida 👌":gen>notaEsperada?"Tu nota superó tu expectativa 👏":"La nota es menor a lo esperado. Hablemos en clase 💬";
+
+  document.getElementById("result-content").innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+      <div class="avatar">${initials}</div>
+      <div><div class="result-name">${s.name}</div><div class="result-sub">Nro. lista: ${s.num} · Grupo 2°ME</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="scores-grid">
+      <div class="score-card"><div class="tag tag-der">DER · Mayo</div><div class="score-label">Escrito 15/05<br>Modelo ER</div><div class="score-val ${s.scores.may!==null?sc(s.scores.may):""}">${may}</div></div>
+      <div class="score-card"><div class="tag tag-mr">MR · Junio</div><div class="score-label">Escrito 26/06<br>Modelo Relacional</div><div class="score-val ${s.scores.jun!==null?sc(s.scores.jun):""}">${jun}</div></div>
+      <div class="score-card"><div class="tag tag-gen">General</div><div class="score-label">Calificación<br>May–Jun</div><div class="score-val ${sc(gen)}">${gen}</div></div>
+    </div>
+    ${obsHTML}
+    <div class="juicio-box"><p>${s.juicio}</p></div>
+    <div class="compare-row">
+      <span class="compare-badge">Tu nota esperada:</span>
+      <span class="compare-val">${notaEsperada}</span>
+      <span class="compare-msg">${diff}</span>
+    </div>`;
+
+  document.getElementById("send-status").innerHTML=`<span class="spin"></span> Enviando resumen a la docente...`;
+  sendEmail();
+}
+
+async function sendEmail(){
+  const s=student;
+  const qLabels=["Preparación","Uso de CREA","Tema difícil"];
+  const surveyText=SURVEY.map((q,i)=>`• ${qLabels[i]}: ${answers[q.id]!==undefined?q.opts[answers[q.id]]:"—"}`).join("\n");
+  const body=`Consulta de rendimiento — ${new Date().toLocaleString("es-UY")}
+
+Estudiante: ${s.name}
+Nro. lista: ${s.num} | Grupo: 2°ME
+
+CALIFICACIONES
+• Escrito DER (15/05): ${s.scores.may!==null?s.scores.may:"No registrado"}
+• Escrito MR (26/06): ${s.scores.jun!==null?s.scores.jun:"No registrado"}
+• Calificación general May-Jun: ${s.scores.gen}
+
+AUTOEVALUACIÓN
+${surveyText}
+• Nota esperada: ${notaEsperada}
+• Resultado: ${s.scores.gen===notaEsperada?"Coincide":(s.scores.gen>notaEsperada?"Superó expectativa en +"+(s.scores.gen-notaEsperada):"Por debajo en "+(notaEsperada-s.scores.gen)+" punto(s)")}
+${s.obs?"\nOBSERVACIÓN\n"+s.obs:""}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",max_tokens:1000,
+        mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail-mcp"}],
+        messages:[{role:"user",content:`Enviá un email usando Gmail a shana2000@gmail.com con asunto "Rendimiento ${s.name} – 2°ME Bases de Datos" y este cuerpo exacto:\n\n${body}`}]
+      })
+    });
+    document.getElementById("send-status").innerHTML=r.ok?
+      `<i class="ti ti-check" style="color:var(--text-success)"></i> <span style="color:var(--text-success)">Resumen enviado a la docente.</span>`:
+      `<i class="ti ti-info-circle"></i> No se pudo enviar el resumen automáticamente.`;
+  }catch(e){
+    document.getElementById("send-status").innerHTML=`<i class="ti ti-info-circle"></i> No se pudo enviar el resumen automáticamente.`;
+  }
+}
+
+document.getElementById("btn-reset").onclick=function(){
+  student=null;answers={};notaEsperada=null;step=0;
+  document.getElementById("ci-input").value="";
+  document.getElementById("login-error").style.display="none";
+  show("screen-login");
+};
+</script>
+</body>
+</html>
