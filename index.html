@@ -94,6 +94,8 @@
   .screen{display:none}
   .screen.active{display:block}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("HAM6A9Z3L9vmQmgra");</script>
 </head>
 <body>
 <div class="wrap">
@@ -265,36 +267,23 @@ function showResult(){
 async function sendEmail(){
   const s=student;
   const qLabels=["Preparación","Uso de CREA","Tema difícil"];
-  const surveyText=SURVEY.map((q,i)=>`• ${qLabels[i]}: ${answers[q.id]!==undefined?q.opts[answers[q.id]]:"—"}`).join("\n");
-  const body=`Consulta de rendimiento — ${new Date().toLocaleString("es-UY")}
-
-Estudiante: ${s.name}
-Nro. lista: ${s.num} | Grupo: 2°ME
-
-CALIFICACIONES
-• Escrito DER (15/05): ${s.scores.may!==null?s.scores.may:"No registrado"}
-• Escrito MR (26/06): ${s.scores.jun!==null?s.scores.jun:"No registrado"}
-• Calificación general May-Jun: ${s.scores.gen}
-
-AUTOEVALUACIÓN
-${surveyText}
-• Nota esperada: ${notaEsperada}
-• Resultado: ${s.scores.gen===notaEsperada?"Coincide":(s.scores.gen>notaEsperada?"Superó expectativa en +"+(s.scores.gen-notaEsperada):"Por debajo en "+(notaEsperada-s.scores.gen)+" punto(s)")}
-${s.obs?"\nOBSERVACIÓN\n"+s.obs:""}`;
-
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-6",max_tokens:1000,
-        mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail-mcp"}],
-        messages:[{role:"user",content:`Enviá un email usando Gmail a shana2000@gmail.com con asunto "Rendimiento ${s.name} – 2°ME Bases de Datos" y este cuerpo exacto:\n\n${body}`}]
-      })
+    await emailjs.send("service_wo2gdhc","template_m2oudfi",{
+      to_email:"shana2000@gmail.com",
+      student_name:s.name,
+      student_num:s.num,
+      score_der:s.scores.may!==null?s.scores.may:"No registrado",
+      score_mr:s.scores.jun!==null?s.scores.jun:"No registrado",
+      score_gen:s.scores.gen,
+      survey_prep:answers["q1"]!==undefined?SURVEY[0].opts[answers["q1"]]:"—",
+      survey_crea:answers["q2"]!==undefined?SURVEY[1].opts[answers["q2"]]:"—",
+      survey_dif:answers["q3"]!==undefined?SURVEY[2].opts[answers["q3"]]:"—",
+      nota_esperada:notaEsperada,
+      diferencia:s.scores.gen===notaEsperada?"Coincide":(s.scores.gen>notaEsperada?"Superó expectativa en +"+(s.scores.gen-notaEsperada):"Por debajo en "+(notaEsperada-s.scores.gen)+" punto(s)"),
+      observacion:s.obs||"Sin observaciones",
+      fecha:new Date().toLocaleString("es-UY")
     });
-    document.getElementById("send-status").innerHTML=r.ok?
-      `<i class="ti ti-check" style="color:var(--text-success)"></i> <span style="color:var(--text-success)">Resumen enviado a la docente.</span>`:
-      `<i class="ti ti-info-circle"></i> No se pudo enviar el resumen automáticamente.`;
+    document.getElementById("send-status").innerHTML=`<i class="ti ti-check" style="color:var(--text-success)"></i> <span style="color:var(--text-success)">Resumen enviado a la docente.</span>`;
   }catch(e){
     document.getElementById("send-status").innerHTML=`<i class="ti ti-info-circle"></i> No se pudo enviar el resumen automáticamente.`;
   }
