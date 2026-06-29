@@ -240,7 +240,7 @@ function renderStep(){
     document.getElementById("survey-content").innerHTML=`
       <div class="q-num">Pregunta ${SURVEY.length+1} de ${SURVEY.length+1}</div>
       <div class="q-text">¿Qué calificación general esperabas obtener en este período? <span style="font-size:12px;color:var(--text-muted)">(escala 1–7)</span></div>
-      <div class="nota-row">${[1,2,3,4,5,6,7].map(n=>`<button class="nota-btn${notaEsperada===n?" selected":""}" onclick="pickNota(${n})">${n}</button>`).join("")}</div>`;
+      <div class="nota-row">${[1,2,3,4,5,6,7,8].map(n=>`<button class="nota-btn${notaEsperada===n?" selected":""}" onclick="pickNota(${n})">${n}</button>`).join("")}</div>`;
     btn.textContent="Ver mis resultados";
     if(notaEsperada!==null)btn.disabled=false;
   }
