@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal de Rendimiento – 2°ME Bases de Datos</title>
+<title>Portal de Rendimiento – Bases de Datos</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("HAM6A9Z3L9vmQmgra");</script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -67,10 +69,12 @@
   .nota-btn:hover{border-color:var(--border-accent);background:var(--bg-accent);color:var(--text-accent)}
   .nota-btn.selected{border-color:var(--fill-accent);background:var(--bg-accent);color:var(--text-accent)}
   .avatar{width:44px;height:44px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--text-accent);flex-shrink:0}
+  .avatar.mf{background:var(--bg-pro);color:var(--text-pro)}
   .result-name{font-size:17px;font-weight:500}
   .result-sub{font-size:12px;color:var(--text-muted);margin-top:.2rem}
   .divider{border:none;border-top:0.5px solid var(--border);margin:1rem 0}
-  .scores-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .scores-grid-me{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .scores-grid-mf{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
   .score-card{background:var(--surface-1);border-radius:var(--radius);padding:.75rem .5rem;text-align:center}
   .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:500;margin-bottom:.4rem}
   .tag-der{background:var(--bg-pro);color:var(--text-pro)}
@@ -91,21 +95,21 @@
   .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border-strong);border-top-color:var(--fill-accent);border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .privacy-note{text-align:center;font-size:12px;color:var(--text-muted);margin-top:.75rem}
+  .group-badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500;margin-left:.4rem}
+  .badge-me{background:var(--bg-accent);color:var(--text-accent)}
+  .badge-mf{background:var(--bg-pro);color:var(--text-pro)}
   .screen{display:none}
   .screen.active{display:block}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init("HAM6A9Z3L9vmQmgra");</script>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
     <div class="logo">Instituto Tecnológico de Informática · C.E.T.P.</div>
     <h1>Portal de Rendimiento<br>Introducción a Bases de Datos</h1>
-    <p class="sub">Grupo 2°ME · Mayo–Junio 2026</p>
+    <p class="sub">Grupos 2°ME y 2°MF · 2026</p>
   </div>
 
-  <!-- PANTALLA 1: LOGIN -->
   <div id="screen-login" class="screen active">
     <div class="card">
       <div class="card-title">Identificación</div>
@@ -117,7 +121,6 @@
     <p class="privacy-note"><i class="ti ti-lock" style="font-size:12px"></i> Solo podés ver tus propios resultados.</p>
   </div>
 
-  <!-- PANTALLA 2: ENCUESTA -->
   <div id="screen-survey" class="screen">
     <div class="step-dots" id="step-dots"></div>
     <div class="card">
@@ -127,7 +130,6 @@
     <p class="privacy-note">Respondé antes de ver tus notas. No hay respuestas incorrectas.</p>
   </div>
 
-  <!-- PANTALLA 3: RESULTADO -->
   <div id="screen-result" class="screen">
     <div class="card">
       <div id="result-content"></div>
@@ -138,32 +140,59 @@
 </div>
 
 <script>
-const STUDENTS = {
-  "57444285":{name:"Emiliano Germán Acosta Romero",num:1,scores:{may:4,jun:4,gen:5},juicio:"¡Buena participación en clase! Para afianzar lo aprendido, te sugiero rehacer los ejercicios en casa; verás que te dará mucha más seguridad.",obs:null},
-  "58501563":{name:"Agustín Maximiliano Aguirre Martínez",num:3,scores:{may:2,jun:4,gen:4},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que los ejercicios te resulten mucho más fáciles.",obs:null},
-  "56012455":{name:"Pedro Giovanni Balarini Pricoli",num:4,scores:{may:1,jun:1,gen:2},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito mayo: Se retiró luego del protocolo de incendio sin avisar."},
-  "58504399":{name:"Santiago Bordón Espino",num:5,scores:{may:8,jun:6,gen:7},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58036465":{name:"Thiago Colman",num:6,scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:null},
-  "58030308":{name:"Thiago Valentino Conde Suárez",num:7,scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito junio: No se evidencia estudio en casa ni acercamiento a los materiales de CREA."},
-  "58083797":{name:"Martín Da Silveira Möller",num:8,scores:{may:6,jun:3,gen:5},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:"Escrito junio: Las llegadas a 2.ª hora en este período se reflejaron en el rendimiento."},
-  "57760128":{name:"Mateo Esequiel Esteche Medina",num:9,scores:{may:null,jun:4,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:"Escrito junio: Las inasistencias en este período se reflejaron en el rendimiento."},
-  "61566716":{name:"Raúl Sendic Furtado López",num:10,scores:{may:1,jun:5,gen:5},juicio:"Observo un buen avance. Revisá los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58083838":{name:"Federico Gasdia Leivas",num:11,scores:{may:6,jun:6,gen:6},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "57675925":{name:"Juan Ignacio González Rosso",num:12,scores:{may:4,jun:3,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:null},
-  "58376015":{name:"Nahuel López Bittencourt",num:13,scores:{may:9,jun:10,gen:8},juicio:"¡Excelente desempeño! Tu constancia para resolver problemas y participar enriquece la clase. Continuá trabajando así.",obs:null},
-  "58484410":{name:"Luis Sebastián Madruga Ríos",num:14,scores:{may:5,jun:5,gen:5},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58177394":{name:"Juan Ignacio Maldonado Linari",num:15,scores:{may:4,jun:4,gen:4},juicio:"Observo un buen avance. Participá más e intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58151106":{name:"Lautaro Martínez Mareco",num:16,scores:{may:1,jun:null,gen:3},juicio:"Es vital aumentar tu compromiso: revisá los materiales en CREA antes de clase, consultá tus dudas en clase y asistí a tutorías para superarte.",obs:"Escrito junio: No asistió."},
-  "58478463":{name:"Facundo Santiago Pimentel Bentancor",num:17,scores:{may:6,jun:7,gen:7},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58089064":{name:"Joaquín Salazar Pacheco",num:18,scores:{may:7,jun:4,gen:6},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null},
-  "65094329":{name:"Carlos Daniel Sotillo Mollegas",num:19,scores:{may:6,jun:5,gen:6},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
-  "58478883":{name:"Juan Ignacio Souza Antúnez",num:20,scores:{may:7,jun:8,gen:7},juicio:"¡Muy buen trabajo! Valoro tu participación y tu dedicación a la asignatura. Continuá.",obs:null},
-  "58518633":{name:"Santiago Suárez Carabajal",num:21,scores:{may:9,jun:5,gen:7},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null}
+// ── GRUPO 2°ME ─────────────────────────────────────────────────────────────
+const ME = {
+  "57444285":{name:"Emiliano Germán Acosta Romero",num:1,grupo:"2°ME",scores:{may:4,jun:4,gen:5},juicio:"¡Buena participación en clase! Para afianzar lo aprendido, te sugiero rehacer los ejercicios en casa; verás que te dará mucha más seguridad.",obs:null},
+  "58501563":{name:"Agustín Maximiliano Aguirre Martínez",num:3,grupo:"2°ME",scores:{may:2,jun:4,gen:4},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que los ejercicios te resulten mucho más fáciles.",obs:null},
+  "56012455":{name:"Pedro Giovanni Balarini Pricoli",num:4,grupo:"2°ME",scores:{may:1,jun:1,gen:2},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito mayo: Se retiró luego del protocolo de incendio sin avisar."},
+  "58504399":{name:"Santiago Bordón Espino",num:5,grupo:"2°ME",scores:{may:8,jun:6,gen:7},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58036465":{name:"Thiago Colman",num:6,grupo:"2°ME",scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:null},
+  "58030308":{name:"Thiago Valentino Conde Suárez",num:7,grupo:"2°ME",scores:{may:3,jun:3,gen:3},juicio:"Te invito a revisar CREA, realizar ejercicios en casa y asistir a tutorías. Verás que resolver dudas a tiempo hará que los ejercicios te resulten mucho más fáciles.",obs:"Escrito junio: No se evidencia estudio en casa ni acercamiento a los materiales de CREA."},
+  "58083797":{name:"Martín Da Silveira Möller",num:8,grupo:"2°ME",scores:{may:6,jun:3,gen:5},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:"Escrito junio: Las llegadas a 2.ª hora en este período se reflejaron en el rendimiento."},
+  "57760128":{name:"Mateo Esequiel Esteche Medina",num:9,grupo:"2°ME",scores:{may:null,jun:4,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:"Escrito junio: Las inasistencias en este período se reflejaron en el rendimiento."},
+  "61566716":{name:"Raúl Sendic Furtado López",num:10,grupo:"2°ME",scores:{may:1,jun:5,gen:5},juicio:"Observo un buen avance. Revisá los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58083838":{name:"Federico Gasdia Leivas",num:11,grupo:"2°ME",scores:{may:6,jun:6,gen:6},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "57675925":{name:"Juan Ignacio González Rosso",num:12,grupo:"2°ME",scores:{may:4,jun:3,gen:4},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas nuevos y consultar cada duda en clase; paso a paso recuperaremos el ritmo.",obs:null},
+  "58376015":{name:"Nahuel López Bittencourt",num:13,grupo:"2°ME",scores:{may:9,jun:10,gen:8},juicio:"¡Excelente desempeño! Tu constancia para resolver problemas y participar enriquece la clase. Continuá trabajando así.",obs:null},
+  "58484410":{name:"Luis Sebastián Madruga Ríos",num:14,grupo:"2°ME",scores:{may:5,jun:5,gen:5},juicio:"Buena actuación. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58177394":{name:"Juan Ignacio Maldonado Linari",num:15,grupo:"2°ME",scores:{may:4,jun:4,gen:4},juicio:"Observo un buen avance. Participá más e intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58151106":{name:"Lautaro Martínez Mareco",num:16,grupo:"2°ME",scores:{may:1,jun:null,gen:3},juicio:"Es vital aumentar tu compromiso: revisá los materiales en CREA antes de clase, consultá tus dudas en clase y asistí a tutorías para superarte.",obs:"Escrito junio: No asistió."},
+  "58478463":{name:"Facundo Santiago Pimentel Bentancor",num:17,grupo:"2°ME",scores:{may:6,jun:7,gen:7},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58089064":{name:"Joaquín Salazar Pacheco",num:18,grupo:"2°ME",scores:{may:7,jun:4,gen:6},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null},
+  "65094329":{name:"Carlos Daniel Sotillo Mollegas",num:19,grupo:"2°ME",scores:{may:6,jun:5,gen:6},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58478883":{name:"Juan Ignacio Souza Antúnez",num:20,grupo:"2°ME",scores:{may:7,jun:8,gen:7},juicio:"¡Muy buen trabajo! Valoro tu participación y tu dedicación a la asignatura. Continuá.",obs:null},
+  "58518633":{name:"Santiago Suárez Carabajal",num:21,grupo:"2°ME",scores:{may:9,jun:5,gen:7},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null}
 };
+
+// ── GRUPO 2°MF ─────────────────────────────────────────────────────────────
+const MF = {
+  "57492395":{name:"Sofía Agustina Benítez Antonini",num:1,grupo:"2°MF",scores:{jun:null,gen:3},juicio:"Se observan avances. Para que la calificación lo refleje, es necesario mayor participación y cumplimiento de las instancias escritas. Se sugiere revisar CREA previamente.",obs:"Escrito junio: No asistió."},
+  "58205698":{name:"Zaira Cabrera",num:2,grupo:"2°MF",scores:{jun:5,gen:7},juicio:"Destaco tu gran participación en el aula. Para que tus notas reflejen ese esfuerzo, es fundamental que repases los contenidos en casa.",obs:null},
+  "57780362":{name:"Teo Benjamín Cabrera Yaros",num:3,grupo:"2°MF",scores:{jun:7,gen:7},juicio:"¡Muy buen trabajo! Valoro tu dedicación a la asignatura. Esperamos más participación. ¡Continuá!",obs:null},
+  "58441557":{name:"Jairo Ezequiel Cardozo Dos Santos",num:4,grupo:"2°MF",scores:{jun:5,gen:6},juicio:"Trabajás bien en clase. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58218041":{name:"Federico Castro Figueredo",num:5,grupo:"2°MF",scores:{jun:3,gen:4},juicio:"Podés más de lo que muestran tus notas. Las distracciones te están costando rendimiento. Es momento de enfocarse y retomar el ritmo.",obs:"Escrito junio: Las llegadas tarde y la falta de concentración en clase se vieron reflejadas en la aplicación práctica."},
+  "57316969":{name:"Ángel Reynaldo Correa Silva",num:6,grupo:"2°MF",scores:{jun:3,gen:4},juicio:"Noto mejora, pero sin preparación previa no se verá en las evaluaciones. Revisá CREA, armá esquemas y consultá en clase. El segundo semestre exige más compromiso.",obs:null},
+  "56823232":{name:"Mathías Federico Correa Silva",num:7,grupo:"2°MF",scores:{jun:3,gen:4},juicio:"Podés más de lo que muestran tus notas. Las distracciones te están costando rendimiento. Es momento de enfocarse y retomar el ritmo.",obs:null},
+  "57633254":{name:"Mateo Ismael Domínguez González",num:8,grupo:"2°MF",scores:{jun:5,gen:5},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:"Escrito junio: La evaluación no refleja el trabajo en clase. Realiza el pasaje de entidades e identifica claves foráneas correctamente, pero no logra el pasaje de relaciones N:N, 1:N, autorrelación y agregación."},
+  "58090124":{name:"Mario Ignacio Fleitas Albanese",num:10,grupo:"2°MF",scores:{jun:8,gen:8},juicio:"¡Excelente desempeño! Tu constancia para resolver problemas y participar enriquece la clase. Continuá trabajando así.",obs:null},
+  "57399971":{name:"Richard Ignacio Gorri Martínez",num:11,grupo:"2°MF",scores:{jun:4,gen:6},juicio:"Observo un buen avance. Intentá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "57828772":{name:"Agustín Miguel Gutiérrez Martínez",num:12,grupo:"2°MF",scores:{jun:1,gen:4},juicio:"Noto mejora, pero sin preparación previa no se verá en las evaluaciones. Revisá CREA, armá esquemas y consultá en clase. El segundo semestre exige más compromiso.",obs:null},
+  "58462080":{name:"Renato Montero Rodríguez",num:13,grupo:"2°MF",scores:{jun:9,gen:8},juicio:"¡Excelente desempeño! Destaco tu compromiso con la asignatura. Continuá trabajando así.",obs:null},
+  "66929593":{name:"Miranda Sofía Pacheco Zambrano",num:14,grupo:"2°MF",scores:{jun:7,gen:7},juicio:"Buena actuación en clase. Recordá revisar los materiales en CREA antes de vernos; venir con una idea previa hará que la clase te resulte más ágil.",obs:null},
+  "58111665":{name:"Santiago Juan Pieri Fonseca",num:15,grupo:"2°MF",scores:{jun:null,gen:3},juicio:"Tus inasistencias te desconectan del curso. Es necesario mayor participación y cumplimiento de las instancias escritas. Se sugiere revisar CREA previamente.",obs:"Escrito junio: No se presentó."},
+  "57300423":{name:"Martín Pompozzi Schiaffino",num:16,grupo:"2°MF",scores:{jun:1,gen:2},juicio:"Podés más si te proponés estudiar con seriedad. Las distracciones te están costando rendimiento. Es momento de enfocarse y retomar el ritmo. Asistí a tutorías.",obs:null},
+  "58221187":{name:"Jair Etien Quiroga Montes",num:17,grupo:"2°MF",scores:{jun:9,gen:8},juicio:"¡Excelente trabajo! Valoro tu participación y tu dedicación a la asignatura. Continuá.",obs:null},
+  "67101863":{name:"Aaron Elías Romero Mirabal",num:18,grupo:"2°MF",scores:{jun:4,gen:5},juicio:"Noto una baja en tu rendimiento. Te propongo armar esquemas de los temas, consultar cada duda en clase. Es vital a esta altura trabajar con más seriedad.",obs:null},
+  "58138249":{name:"Leandro Varsi Sierra",num:19,grupo:"2°MF",scores:{jun:9,gen:7},juicio:"¡Muy buen trabajo! Valoro tu dedicación a la asignatura, se vieron los resultados en la evaluación. Continuá.",obs:null},
+  "56685143":{name:"Federico Sanidel Vequio Ferrer",num:20,grupo:"2°MF",scores:{jun:9,gen:8},juicio:"¡Excelente desempeño! Tu constancia para resolver problemas y participar enriquece la clase. Continuá trabajando así.",obs:null},
+  "58010562":{name:"Lautaro Santino Vicca Peña",num:21,grupo:"2°MF",scores:{jun:3,gen:3},juicio:"Podés más de lo que muestran tus notas. Las distracciones te están costando rendimiento. Es momento de enfocarse y retomar el ritmo.",obs:null}
+};
+
+const STUDENTS = {...ME, ...MF};
 
 const SURVEY = [
   {id:"q1",text:"¿Cómo te preparaste para los escritos de este período?",opts:["Estudié varios días antes","Estudié el día anterior","Repasé poco antes de entrar","No tuve tiempo de estudiar"]},
-  {id:"q2",text:"¿Consultaste los materiales de CREA durante mayo y junio?",opts:["Sí, los revisé varias veces","Los abrí una o dos veces","Los vi pero no los estudié","No los consulté"]},
+  {id:"q2",text:"¿Consultaste los materiales de CREA durante este período?",opts:["Sí, los revisé varias veces","Los abrí una o dos veces","Los vi pero no los estudié","No los consulté"]},
   {id:"q3",text:"¿Qué tema te resultó más difícil?",opts:["Modelo Entidad-Relación (DER)","Modelo Relacional (MR / pasaje a tablas)","Los dos por igual","Ninguno, me sentí bien"]}
 ];
 
@@ -172,6 +201,7 @@ let student=null,answers={},notaEsperada=null,step=0;
 function sc(v){if(v===null)return"";if(v>=7)return"high";if(v>=5)return"mid";return"low";}
 function norm(s){return s.replace(/[.\- ]/g,"").trim();}
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+function isMF(s){return s.grupo==="2°MF";}
 
 document.getElementById("btn-login").onclick=go;
 document.getElementById("ci-input").addEventListener("keydown",e=>{if(e.key==="Enter")go();});
@@ -234,24 +264,57 @@ document.getElementById("btn-next").onclick=function(){
 function showResult(){
   show("screen-result");
   const s=student;
-  const may=s.scores.may!==null?s.scores.may:"—";
+  const mf=isMF(s);
   const jun=s.scores.jun!==null?s.scores.jun:"—";
+  const may=s.scores.may!==null?s.scores.may:"—";
   const gen=s.scores.gen;
   const initials=s.name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
   const obsHTML=s.obs?`<div class="obs-box"><p><strong>Nota:</strong> ${s.obs}</p></div>`:"";
   const diff=gen===notaEsperada?"Coincide con la nota obtenida 👌":gen>notaEsperada?"Tu nota superó tu expectativa 👏":"La nota es menor a lo esperado. Hablemos en clase 💬";
+  const badgeClass=mf?"badge-mf":"badge-me";
+  const avatarClass=mf?"avatar mf":"avatar";
+
+  const scoresHTML = mf
+    ? `<div class="scores-grid-mf">
+        <div class="score-card">
+          <div class="tag tag-mr">MR · Junio</div>
+          <div class="score-label">Escrito 24/06<br>Modelo Relacional</div>
+          <div class="score-val ${s.scores.jun!==null?sc(s.scores.jun):""}">${jun}</div>
+        </div>
+        <div class="score-card">
+          <div class="tag tag-gen">General</div>
+          <div class="score-label">Calificación<br>período</div>
+          <div class="score-val ${sc(gen)}">${gen}</div>
+        </div>
+      </div>`
+    : `<div class="scores-grid-me">
+        <div class="score-card">
+          <div class="tag tag-der">DER · Mayo</div>
+          <div class="score-label">Escrito 15/05<br>Modelo ER</div>
+          <div class="score-val ${s.scores.may!==null?sc(s.scores.may):""}">${may}</div>
+        </div>
+        <div class="score-card">
+          <div class="tag tag-mr">MR · Junio</div>
+          <div class="score-label">Escrito 26/06<br>Modelo Relacional</div>
+          <div class="score-val ${s.scores.jun!==null?sc(s.scores.jun):""}">${jun}</div>
+        </div>
+        <div class="score-card">
+          <div class="tag tag-gen">General</div>
+          <div class="score-label">Calificación<br>May–Jun</div>
+          <div class="score-val ${sc(gen)}">${gen}</div>
+        </div>
+      </div>`;
 
   document.getElementById("result-content").innerHTML=`
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
-      <div class="avatar">${initials}</div>
-      <div><div class="result-name">${s.name}</div><div class="result-sub">Nro. lista: ${s.num} · Grupo 2°ME</div></div>
+      <div class="${avatarClass}">${initials}</div>
+      <div>
+        <div class="result-name">${s.name}</div>
+        <div class="result-sub">Lista: ${s.num} · <span class="group-badge ${badgeClass}">${s.grupo}</span></div>
+      </div>
     </div>
     <div class="divider"></div>
-    <div class="scores-grid">
-      <div class="score-card"><div class="tag tag-der">DER · Mayo</div><div class="score-label">Escrito 15/05<br>Modelo ER</div><div class="score-val ${s.scores.may!==null?sc(s.scores.may):""}">${may}</div></div>
-      <div class="score-card"><div class="tag tag-mr">MR · Junio</div><div class="score-label">Escrito 26/06<br>Modelo Relacional</div><div class="score-val ${s.scores.jun!==null?sc(s.scores.jun):""}">${jun}</div></div>
-      <div class="score-card"><div class="tag tag-gen">General</div><div class="score-label">Calificación<br>May–Jun</div><div class="score-val ${sc(gen)}">${gen}</div></div>
-    </div>
+    ${scoresHTML}
     ${obsHTML}
     <div class="juicio-box"><p>${s.juicio}</p></div>
     <div class="compare-row">
@@ -266,13 +329,22 @@ function showResult(){
 
 async function sendEmail(){
   const s=student;
+  const mf=isMF(s);
   const qLabels=["Preparación","Uso de CREA","Tema difícil"];
+  const surveyText=SURVEY.map((q,i)=>`• ${qLabels[i]}: ${answers[q.id]!==undefined?q.opts[answers[q.id]]:"—"}`).join("\n");
+
+  const scoresText = mf
+    ? `• Escrito MR (24/06): ${s.scores.jun!==null?s.scores.jun:"No registrado"}`
+    : `• Escrito DER (15/05): ${s.scores.may!==null?s.scores.may:"No registrado"}\n• Escrito MR (26/06): ${s.scores.jun!==null?s.scores.jun:"No registrado"}`;
+
   try{
     await emailjs.send("service_wo2gdhc","template_m2oudfi",{
       to_email:"shana2000@gmail.com",
+      subject:`Rendimiento ${s.name} – ${s.grupo} Bases de Datos`,
       student_name:s.name,
       student_num:s.num,
-      score_der:s.scores.may!==null?s.scores.may:"No registrado",
+      student_grupo:s.grupo,
+      score_der:s.scores.may!==null?s.scores.may:"—",
       score_mr:s.scores.jun!==null?s.scores.jun:"No registrado",
       score_gen:s.scores.gen,
       survey_prep:answers["q1"]!==undefined?SURVEY[0].opts[answers["q1"]]:"—",
